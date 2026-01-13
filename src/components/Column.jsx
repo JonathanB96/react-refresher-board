@@ -1,6 +1,13 @@
 import TaskCard from "./TaskCard";
 
-export default function Column({ title, count, tasks, onMoveTask, onDeleteTask }) {
+export default function Column({
+  title,
+  count,
+  tasks,
+  onMoveTask,
+  onDeleteTask,
+  onEditTask,
+}) {
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -20,6 +27,7 @@ export default function Column({ title, count, tasks, onMoveTask, onDeleteTask }
               task={task}
               onMove={onMoveTask}
               onDelete={onDeleteTask}
+              onEdit={onEditTask}
             />
           ))}
         </div>

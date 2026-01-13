@@ -1,6 +1,6 @@
 import Column from "./Column";
 
-export default function Board({ columns, tasks, onMoveTask, onDeleteTask }) {
+export default function Board({ columns, tasks, onMoveTask, onDeleteTask, onEditTask }) {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {columns.map((col) => {
@@ -14,6 +14,7 @@ export default function Board({ columns, tasks, onMoveTask, onDeleteTask }) {
             tasks={tasksInColumn}
             onMoveTask={onMoveTask}
             onDeleteTask={onDeleteTask}
+            onEditTask={onEditTask}
           />
         );
       })}

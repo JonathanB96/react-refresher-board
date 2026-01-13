@@ -12,7 +12,7 @@ const priorityBadge = {
   high: "High",
 };
 
-export default function TaskCard({ task, onMove, onDelete, onEdit }) {
+export default function TaskCard({ task, onMove, onDelete, onEdit = () => {} }) { console.log("onEdit type:", typeof onEdit);
   return (
     <article className="rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -53,18 +53,18 @@ export default function TaskCard({ task, onMove, onDelete, onEdit }) {
         )}
 
         <button
+          className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs hover:bg-slate-800"
+          onClick={() => onEdit(task)}
+        >
+          Edit
+        </button>
+
+        <button
           className="ml-auto rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-1.5 text-xs text-red-200 hover:bg-red-950/70"
           onClick={() => onDelete(task.id)}
         >
           Delete
         </button>
-        <button
-          className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs hover:bg-slate-800"
-          onClick={() => onEdit(task)}
-        >
-         Edit
-        </button>
-
       </div>
     </article>
   );
