@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 
 import Board from "../components/Board";
 import TaskModal from "../components/TaskModal";
@@ -7,6 +7,7 @@ import SearchBar from "../components/SearchBar";
 import Stats from "../components/Stats";
 
 import { useDebounce } from "../hooks/useDebounce";
+import { boardReducer, initialState } from "../lib/boardReducer";
 
 const columns = [
   { id: "todo", title: "Todo" },
@@ -39,60 +40,23 @@ const initialTasks = [
 ];
 
 export default function App() {
-  /* ---------------- state ---------------- */
-  const [tasks, setTasks] = useState(initialTasks);
+  const [state, dispatch] = useReducer(boardReducer, initialState);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
+  // init tasks once (simulates fetching)
+  useEffect(() => {
+    dispatch({ type: "TASKS_INIT", payload: initialTasks });
+  }, []);
 
-  const [search, setSearch] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState("all");
+  const { tasks, ui } = state;
 
-  const debouncedSearch = useDebounce(search, 250);
+  const debouncedSearch = useDebounce(ui.search, 250);
 
-  /* ---------------- actions ---------------- */
-  function moveTask(taskId, newStatus) {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
-    );
-  }
-
-  function addTask(newTask) {
-    setTasks((prev) => [newTask, ...prev]);
-  }
-
-  function deleteTask(taskId) {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-
-    if (editingTask?.id === taskId) {
-      setIsModalOpen(false);
-      setEditingTask(null);
-    }
-  }
-
-  function openEdit(task) {
-    setEditingTask(task);
-    setIsModalOpen(true);
-  }
-
-  function closeEdit() {
-    setIsModalOpen(false);
-    setEditingTask(null);
-  }
-
-  function saveTask(updatedTask) {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
-    );
-  }
-
-  /* ---------------- derived data ---------------- */
   const filteredTasks = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
 
     return tasks.filter((t) => {
       const matchesPriority =
-        priorityFilter === "all" ? true : t.priority === priorityFilter;
+        ui.priorityFilter === "all" ? true : t.priority === ui.priorityFilter;
 
       const matchesSearch =
         q.length === 0
@@ -103,7 +67,7 @@ export default function App() {
 
       return matchesPriority && matchesSearch;
     });
-  }, [tasks, debouncedSearch, priorityFilter]);
+  }, [tasks, debouncedSearch, ui.priorityFilter]);
 
   const stats = useMemo(() => {
     const counts = { todo: 0, doing: 0, done: 0 };
@@ -118,7 +82,10 @@ export default function App() {
     };
   }, [tasks, filteredTasks.length]);
 
-  /* ---------------- UI ---------------- */
+  const editingTask = useMemo(() => {
+    return tasks.find((t) => t.id === ui.editingTaskId) ?? null;
+  }, [tasks, ui.editingTaskId]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex justify-center">
       <div className="w-full max-w-6xl p-6">
@@ -128,15 +95,13 @@ export default function App() {
               React Refresher Board
             </h1>
             <p className="text-sm text-slate-300">
-              Add • Edit • Search • Filter • Memo • Debounce
+              Step 9: useReducer architecture ✅
             </p>
           </div>
 
           <div className="text-sm text-slate-300">
             Tasks:{" "}
-            <span className="font-semibold text-slate-100">
-              {tasks.length}
-            </span>
+            <span className="font-semibold text-slate-100">{tasks.length}</span>
           </div>
         </header>
 
@@ -144,27 +109,39 @@ export default function App() {
           <Stats {...stats} />
 
           <SearchBar
-            search={search}
-            onSearchChange={setSearch}
-            priority={priorityFilter}
-            onPriorityChange={setPriorityFilter}
+            search={ui.search}
+            onSearchChange={(v) => dispatch({ type: "UI_SET_SEARCH", payload: v })}
+            priority={ui.priorityFilter}
+            onPriorityChange={(v) =>
+              dispatch({ type: "UI_SET_PRIORITY", payload: v })
+            }
           />
 
-          <AddTaskForm onAdd={addTask} />
+          <AddTaskForm
+            onAdd={(task) => dispatch({ type: "TASK_ADD", payload: task })}
+          />
 
           <Board
             columns={columns}
             tasks={filteredTasks}
-            onMoveTask={moveTask}
-            onDeleteTask={deleteTask}
-            onEditTask={openEdit}
+            onMoveTask={(id, status) =>
+              dispatch({ type: "TASK_MOVE", payload: { id, status } })
+            }
+            onDeleteTask={(id) =>
+              dispatch({ type: "TASK_DELETE", payload: id })
+            }
+            onEditTask={(task) =>
+              dispatch({ type: "UI_OPEN_EDIT", payload: task.id })
+            }
           />
 
           <TaskModal
-            isOpen={isModalOpen}
+            isOpen={ui.isModalOpen}
             task={editingTask}
-            onClose={closeEdit}
-            onSave={saveTask}
+            onClose={() => dispatch({ type: "UI_CLOSE_MODAL" })}
+            onSave={(updated) =>
+              dispatch({ type: "TASK_UPDATE", payload: updated })
+            }
           />
         </main>
       </div>
