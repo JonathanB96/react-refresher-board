@@ -1,11 +1,22 @@
 import Column from "./Column";
 
-export default function Board({ columns }) {
+export default function Board({ columns, tasks, onMoveTask, onDeleteTask }) {
   return (
-    <div style={{ display: "flex", gap: 16, marginTop: 20 }}>
-      {columns.map((col) => (
-        <Column key={col.id} title={col.title} />
-      ))}
+    <div className="grid gap-4 md:grid-cols-3">
+      {columns.map((col) => {
+        const tasksInColumn = tasks.filter((t) => t.status === col.id);
+
+        return (
+          <Column
+            key={col.id}
+            title={col.title}
+            count={tasksInColumn.length}
+            tasks={tasksInColumn}
+            onMoveTask={onMoveTask}
+            onDeleteTask={onDeleteTask}
+          />
+        );
+      })}
     </div>
   );
 }
