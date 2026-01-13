@@ -2,7 +2,8 @@ import Column from "./Column";
 
 export default function Board({ columns, tasks, onMoveTask, onDeleteTask, onEditTask }) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
+
       {columns.map((col) => {
         const tasksInColumn = tasks.filter((t) => t.status === col.id);
 

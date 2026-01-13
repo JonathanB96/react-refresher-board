@@ -120,8 +120,8 @@ export default function App() {
 
   /* ---------------- UI ---------------- */
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto max-w-6xl p-6">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex justify-center">
+      <div className="w-full max-w-6xl p-6">
         <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
